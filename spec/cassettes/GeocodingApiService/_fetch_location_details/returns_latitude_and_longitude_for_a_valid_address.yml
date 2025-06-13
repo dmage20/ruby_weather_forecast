@@ -1,0 +1,38 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://nominatim.openstreetmap.org/search?addressdetails=1&format=json&limit=1&q=2001%20Allston%20Way,%20Berkeley,%20CA
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - WeatherApp/1.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx
+      Date:
+      - Fri, 13 Jun 2025 00:55:32 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '794'
+      Connection:
+      - keep-alive
+      Keep-Alive:
+      - timeout=20
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        W3sicGxhY2VfaWQiOjI5OTcwNDU4NSwibGljZW5jZSI6IkRhdGEgwqkgT3BlblN0cmVldE1hcCBjb250cmlidXRvcnMsIE9EYkwgMS4wLiBodHRwOi8vb3NtLm9yZy9jb3B5cmlnaHQiLCJvc21fdHlwZSI6IndheSIsIm9zbV9pZCI6NDMwMDE5NzUsImxhdCI6IjM3Ljg2OTM4OTIiLCJsb24iOiItMTIyLjI2OTk4MjUiLCJjbGFzcyI6ImxlaXN1cmUiLCJ0eXBlIjoic3BvcnRzX2NlbnRyZSIsInBsYWNlX3JhbmsiOjMwLCJpbXBvcnRhbmNlIjo3LjA0NTE2NjcwNDgwOTY3MWUtMDUsImFkZHJlc3N0eXBlIjoibGVpc3VyZSIsIm5hbWUiOiJCZXJrZWxleSBZTUNBIiwiZGlzcGxheV9uYW1lIjoiQmVya2VsZXkgWU1DQSwgMjAwMSwgQWxsc3RvbiBXYXksIERvd250b3duIEJlcmtlbGV5LCBCZXJrZWxleSwgQWxhbWVkYSBDb3VudHksIENhbGlmb3JuaWEsIDk0NzA0LCBVbml0ZWQgU3RhdGVzIiwiYWRkcmVzcyI6eyJsZWlzdXJlIjoiQmVya2VsZXkgWU1DQSIsImhvdXNlX251bWJlciI6IjIwMDEiLCJyb2FkIjoiQWxsc3RvbiBXYXkiLCJuZWlnaGJvdXJob29kIjoiRG93bnRvd24gQmVya2VsZXkiLCJjaXR5IjoiQmVya2VsZXkiLCJjb3VudHkiOiJBbGFtZWRhIENvdW50eSIsInN0YXRlIjoiQ2FsaWZvcm5pYSIsIklTTzMxNjYtMi1sdmw0IjoiVVMtQ0EiLCJwb3N0Y29kZSI6Ijk0NzA0IiwiY291bnRyeSI6IlVuaXRlZCBTdGF0ZXMiLCJjb3VudHJ5X2NvZGUiOiJ1cyJ9LCJib3VuZGluZ2JveCI6WyIzNy44NjkxNTgzIiwiMzcuODY5NjM0NCIsIi0xMjIuMjcwMzk3MiIsIi0xMjIuMjY5NTU5NCJdfV0=
+  recorded_at: Fri, 13 Jun 2025 00:55:32 GMT
+recorded_with: VCR 6.3.1

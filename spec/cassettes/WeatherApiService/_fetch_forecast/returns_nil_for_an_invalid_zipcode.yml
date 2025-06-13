@@ -1,0 +1,65 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://api.weatherapi.com/v1/forecast.json?days=3&key=<WEATHER_API_KEY>&q=!@%23
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 400
+      message: Bad Request
+    headers:
+      Date:
+      - Fri, 13 Jun 2025 00:49:50 GMT
+      Content-Type:
+      - application/json
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Vary:
+      - Accept-Encoding
+      Server:
+      - BunnyCDN-SG1-1179
+      Cdn-Pullzone:
+      - '93447'
+      Cdn-Uid:
+      - 8fa3a04a-75d9-4707-8056-b7b33c8ac7fe
+      Cdn-Requestcountrycode:
+      - ID
+      Cache-Control:
+      - no-cache
+      X-Weatherapi-Qpm-Left:
+      - '4999939'
+      Cdn-Proxyver:
+      - '1.28'
+      Cdn-Requestpullsuccess:
+      - 'True'
+      Cdn-Requestpullcode:
+      - '400'
+      Cdn-Cachedat:
+      - 06/13/2025 00:49:50
+      Cdn-Edgestorageid:
+      - '945'
+      Cdn-Requestid:
+      - c93ec7f0df99ff49038f9ed7bb9f42b6
+      Cdn-Cache:
+      - MISS
+      Cdn-Status:
+      - '400'
+      Cdn-Requesttime:
+      - '0'
+    body:
+      encoding: ASCII-8BIT
+      string: '{"error":{"code":1006,"message":"No matching location found."}}'
+  recorded_at: Fri, 13 Jun 2025 00:49:50 GMT
+recorded_with: VCR 6.3.1

@@ -1,0 +1,17 @@
+<!-- app/views/reports/searches.html.erb -->
+<h1>Recent Searches Report (past 7 days)</h1>
+
+<ul>
+  <li><strong>Total Searches:</strong> <%= @total_searches %></li>
+  <li><strong>Cached Searches:</strong> <%= @cached_count %></li>
+  <li><strong>Fresh Searches:</strong> <%= @fresh_count %></li>
+</ul>
+
+<h2>Top 3 Searched Zip Codes</h2>
+<ol>
+  <% @top_zip_codes.each do |zip, count| %>
+    <li><%= zip %> — <%= count %> searches</li>
+  <% end %>
+</ol>
+
+<%= link_to "Back to Forecast Form", root_path %>

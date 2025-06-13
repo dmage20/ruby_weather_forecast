@@ -1,0 +1,30 @@
+<h1>Weather Forecast</h1>
+
+<% if @forecast %>
+  <p><strong>Location:</strong> <%= @location %></p>
+  <p><strong>Temperature:</strong> <%= @forecast['current']['temp_f'] %> °F</p>
+  <p><strong>Condition:</strong> <%= @forecast['current']['condition']['text'] %></p>
+<% if @cached %>
+  <div>
+    <h3 id="countdown" style="color: gray; margin-top: 1rem;">
+      Cached forecast
+    </h3>
+  </div>
+<% end %>
+  <div>
+    <h2>Next 3 Days Forecast</h2>
+    <% @forecast['forecast']['forecastday'].each do |day| %>
+      <div>
+        <strong><%= day['date'] %></strong><br>
+        High: <%= day['day']['maxtemp_f'] %> °F<br>
+        Low: <%= day['day']['mintemp_f'] %> °F<br>
+        Condition: <%= day['day']['condition']['text'] %>
+      </div>
+      <hr>
+    <% end %>
+  </div>
+<% else %>
+  <p>Sorry, no forecast data available.</p>
+<% end %>
+
+<%= link_to "Back", root_path %>
