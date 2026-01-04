@@ -1,131 +1,67 @@
-# README
+# Weather App
 
-# Weather Forecast App
-
-This is a simple Ruby on Rails application that allows users to enter a physical address or zip code and retrieve the current weather and a 3-day weather forecast for the corresponding location. It integrates with the [WeatherAPI](https://www.weatherapi.com/) and [OpenStreetMap Nominatim API](https://nominatim.org/).
-It is meant to demonstrates service-oriented design, API integration, caching, and simple analytics tracking.
-
-## Ruby Version
-
-- Ruby 3.2.2  
-- Rails 7.1.3.2
-
-## System Dependencies
-
-- PostgreSQL
-- [WeatherAPI.com](https://www.weatherapi.com/) key (for weather forecasts)
-- [Nominatim API](https://nominatim.org/release-docs/latest/api/Search/) (for geocoding)
+A production-quality Rails application that provides weather forecasts based on address input.
 
 ## Features
 
-- User can input an address and receive a weather forecast in the US
-- Uses external APIs to geocode and fetch weather data
-- Caches forecast results by zip code for 30 minutes
-- Collects search data for reporting and product insights
-- Retries API calls automatically on transient failures
-- Includes unit, request, and system tests
-- Clean, minimal UI with CSS separation
+- **Address Resolution**: Converts any valid address (or Zip Code) to strict coordinates using the `geocoder` gem (via Nominatim).
+- **Weather Data**: Fetches real-time weather data from the [National Weather Service (NWS) API](https://www.weather.gov/documentation/services-web-api).
+- **Caching**: Implements a robust 30-minute caching strategy based on Zip Code to minimize API calls and improve performance.
+- **Clean UI**: A responsive, accessible interface built with semantic HTML and vanilla CSS.
+- **Resiliency**: Handles API failures gracefully and provides user feedback.
+
+## Tech Stack
+
+- **Ruby on Rails 7.2**
+- **Geocoder**: For address-to-coordinate resolution.
+- **Faraday**: For reliable HTTP requests to NWS.
+- **RSpec**: For comprehensive unit and request testing.
+- **Redis** (Optional): Configured for production caching, falls back to MemoryStore in development.
 
 ## Setup Instructions
 
-1. Install dependencies:
-   ```bash
-   bundle install
-   yarn install
-   ```
+1.  **Install Dependencies**:
+    ```bash
+    bundle install
+    ```
 
-2. Add your WeatherAPI key to credentials:
-   
-	 To edit securely, run:
-   ```bash
-   EDITOR="code --wait" bin/rails credentials:edit
-   ```
-	Then add your api key
-   ```yaml
-   weather_api:
-     key: your_weatherapi_key
-   ```
+2.  **Run Tests**:
+    ```bash
+    bundle exec rspec
+    ```
 
+3.  **Start Server**:
+    ```bash
+    bin/rails server
+    ```
 
----
+4.  **Visit**: `http://localhost:3000`
 
-## Database Creation
+## Decomposition & Design
 
-```bash
-rails db:create
-```
+### Components
 
----
+-   **`WeatherController`**: Handles the HTTP request/response cycle. It accepts user input, delegates logic to the service layer, and prepares data for the view.
+    -   *Why?* To keep the controller "skinny" and focused only on routing and flow control.
 
-## Database Initialization
+-   **`WeatherService`**: The core business logic unit.
+    -   **Responsibilities**:
+        1.  Geocoding the input address.
+        2.  Checking the cache.
+        3.  Fetching data from the NWS API (Grid & Forecast endpoints).
+        4.  Transforming raw JSON into a consumable `WeatherForecast` object.
+    -   *Pattern*: Service Object. Used to encapsulate complex external interactions.
 
-```bash
-rails db:migrate
-```
+-   **`WeatherForecast` (Model/Value Object)**: A plain Ruby object (non-ActiveRecord) that serves as the data structure for the view.
+    -   *Why?* Decouples the view from the raw API response structure, making future API changes easier to manage.
 
----
+### Scalability Considerations
 
-## How to Run the Test Suite
+-   **Caching**: The 30-minute expiration on Zip Code keys ensures that we don't bombard the NWS API for popular locations. Using Rails Cache interface allows easy swapping to Redis/Memcached for distributed caching in production.
+-   **API Client**: `Faraday` is used with a custom User-Agent (required by NWS) and is easily extensible with middleware for retries or logging if needed.
 
-```bash
-bundle exec rspec
-```
+### Best Practices
 
-RSpec is used to test both request and service logic.
-
----
-
-## Services and Features
-
-- **WeatherApiService**: Calls the Weather API and returns 3-day forecast data.
-- **GeocodingApiService**: Converts a user-entered address to a zip code using the Nominatim API.
-- **Rails Cache**: Forecast results are cached by zip code for 30 minutes.
-- **Retry Logic**: A utility method provides fault tolerance when dealing with transient API errors.
-
----
-
-## Deployment Instructions
-
-This is a standard Rails app and can be deployed using for example:
-
-- **Heroku**
-- **Fly.io**
-
-Don’t forget to set the `RAILS_MASTER_KEY` in production environments for credentials access.
-And to share with other developers. 
-
----
-
-## Decomposition
-
-- `ForecastsController`: Handles form submission, manages API calls, caching, and Search object creation.
-- `Search`: Stores address and zip code for historical trend tracking.
-- `WeatherApiService` and `GeocodingApiService`: Isolated service objects for external integrations.
-- `ReportsController`: Displays aggregate data and usage insights for admins or analysts.
-
----
-
-## Design Patterns
-
-- **Service Object Pattern**: Used for both Weather and Geocoding API integrations.
-- **Retry logic**: Could be generalized into a base service layer for cross-cutting concerns.
-
----
-
-## Scalability Considerations
-
-- Caching via `Rails.cache` reduces repeated API calls for frequent searches and provides a simple caching solution.
-- Search records are scoped to recent activity to show the flexibility and usefulness of thoughtful database implementation.
-- Extracted service objects make external API logic easier to extend or replace.
-- In a real-world system:
-  - Background jobs (e.g. Sidekiq) would offload slow or rate-limited API calls.
-  - Redis or Memcached would be used for scalable caching.
-
----
-
-## Notes
-
-- Address input is limited to 200 characters to prevent abuse and malformed requests.
-- All searches are tracked in the database to support business insights.
-- Reporting pages are meant to demonstrate the value of usage tracking and would be restricted to admin users in production.
-
+-   **Encapsulation**: The Controller doesn't know *how* weather is fetched, only that it gets a `WeatherForecast`.
+-   **Error Handling**: Service layer raises standard errors which are caught and displayed as flash messages, preventing crashes.
+-   **TDD**: Features were implemented with RSpec tests driven development.

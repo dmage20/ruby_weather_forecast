@@ -1,0 +1,39 @@
+<div class="weather-container">
+  <h1>Weather Forecast</h1>
+
+  <%= form_with url: weather_path, method: :get, local: true, class: "search-form" do |f| %>
+    <%= f.label :address, "Enter Address or Zip Code:" %>
+    <%= f.text_field :address, value: @address, placeholder: "e.g. 1 Infinite Loop, Cupertino, CA" %>
+    <%= f.submit "Get Forecast", class: "btn" %>
+  <% end %>
+
+  <% if flash[:alert] %>
+    <div class="alert"><%= flash[:alert] %></div>
+  <% end %>
+
+  <% if @forecast %>
+    <div class="forecast-result">
+      <% if @forecast.cached %>
+        <div class="cache-indicator">Cached Result</div>
+      <% end %>
+
+      <div class="current-weather">
+        <h2>Current Temperature</h2>
+        <p class="temp"><%= @forecast.current_temp %>&deg;F</p>
+      </div>
+
+      <% if @forecast.extended_forecast.any? %>
+        <div class="extended-forecast">
+          <h3>Extended Forecast</h3>
+          <ul>
+            <% @forecast.extended_forecast.each do |day| %>
+              <li>
+                <strong><%= day[:name] %>:</strong> <%= day[:text] %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
