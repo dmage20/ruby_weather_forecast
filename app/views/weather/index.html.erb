@@ -7,9 +7,6 @@
     <%= f.submit "Get Forecast", class: "btn" %>
   <% end %>
 
-  <% if flash[:alert] %>
-    <div class="alert"><%= flash[:alert] %></div>
-  <% end %>
 
   <% if @forecast %>
     <div class="forecast-result">
@@ -18,7 +15,10 @@
       <% end %>
 
       <div class="current-weather">
-        <h2>Current Temperature</h2>
+        <% if @forecast.location_name %>
+          <h2><%= @forecast.location_name %></h2>
+        <% end %>
+        <h3>Current Temperature</h3>
         <p class="temp"><%= @forecast.current_temp %>&deg;F</p>
       </div>
 

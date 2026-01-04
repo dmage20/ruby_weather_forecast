@@ -10,12 +10,16 @@ class WeatherService
   end
 
   def call
-    results = Geocoder.search(@address)
+    # Limit geocoding to US to avoid ambiguous zip codes (e.g., 33178 exists in both US and Germany)
+    results = Geocoder.search(@address, params: { countrycodes: "us" })
     raise StandardError, "Address not found" if results.empty?
 
     location = results.first
     zip_code = location.postal_code
     raise StandardError, "Could not determine Zip Code for caching" if zip_code.blank?
+
+    # Extract location name for display (City, State format)
+    location_name = build_location_name(location)
 
     cache_key = "weather_forecast_#{zip_code}"
 
@@ -23,38 +27,19 @@ class WeatherService
     return cached if cached
 
     # Cache Miss - Fetch from API
-    lat = location.latitude
-    lon = location.longitude
+    # NWS API requires coordinates rounded to 4 decimal places
+    lat = location.latitude.round(4)
+    lon = location.longitude.round(4)
 
-    forecast_data = fetch_from_api(lat, lon)
+    forecast_data = fetch_from_api(lat, lon, location_name)
 
     # Store in cache
-    # We must store a new object with cached: true for the future?
-    # Actually, the requirement says "Display indicator if result is pulled from cache".
-    # So the object in cache should probably say cached: true?
-    # Or we construct it anew.
-    # Let's store the raw data object or the WeatherForecast object in cache.
-    # When we read it back, it is the object.
-    # But for the FIRST return, it is NOT cached.
-    # So we return a non-cached version, but store a version that (conceptually) will be cached?
-    # Or better: The object stored in cache doesn't know it's cached.
-    # The SERVICE knows if it got it from cache.
-    # But my `WeatherForecast` has a `cached` boolean.
-    # So:
-    # 1. Fetch data. Create WeatherForecast(cached: true). Write to cache.
-    # 2. Return WeatherForecast(cached: false).
-
-    # Wait, if I write `cached: true` to cache, then next read gets `cached: true`. Correct.
-    # But right now, I return `cached: false`.
-
-    # We can't easily change properites if it's not a struct with setters or we have to re-init.
-    # My model has no setters.
-
     cache_version = WeatherForecast.new(
       current_temp: forecast_data.current_temp,
       min_temp: forecast_data.min_temp,
       max_temp: forecast_data.max_temp,
       extended_forecast: forecast_data.extended_forecast,
+      location_name: forecast_data.location_name,
       cached: true
     )
 
@@ -65,17 +50,33 @@ class WeatherService
 
   private
 
-  def fetch_from_api(lat, lon)
+  def build_location_name(location)
+    # Build a human-readable location name from geocoding result
+    city = location.city || location.town || location.village
+    state = location.state_code || location.state
+
+    if city && state
+      "#{city}, #{state}"
+    elsif city
+      city
+    elsif state
+      state
+    else
+      "Unknown Location"
+    end
+  end
+
+  def fetch_from_api(lat, lon, location_name)
     # 1. Get Grid Points
     conn = Faraday.new(url: NWS_BASE_URL) do |f|
-      f.headers["User-Agent"] = "WeatherApp/1.0 (demo@example.com)"
+      f.request :retry, max: 2, interval: 0.5
+      f.headers["User-Agent"] = "RubyWeatherForecast/1.0 (Weather App)"
+      f.headers["Accept"] = "application/geo+json"
       f.adapter Faraday.default_adapter
-      # Bypassing strict SSL for development/demo environment where local cert chains/CRLs might be flaky
-      f.ssl[:verify] = false
     end
 
     points_resp = conn.get("/points/#{lat},#{lon}")
-    raise StandardError, "Weather API Error: #{points_resp.status}" unless points_resp.success?
+    raise StandardError, "Weather API Error: #{points_resp.status} #{points_resp.bod}" unless points_resp.success?
 
     points_data = JSON.parse(points_resp.body)
     grid_id = points_data.dig("properties", "gridId")
@@ -91,17 +92,12 @@ class WeatherService
 
     current = periods.first || {}
 
-    # Simple logic for high/low. NWS periods are day/night or hourly.
-    # We can just take the current period's temp.
-    # For High/Low, we might need to look at the first 24h or the specific "isDaytime" flags.
-    # Let's just grab the first period for current.
-    # And maybe look at next few periods for "extended".
-
     WeatherForecast.new(
       current_temp: current["temperature"],
       min_temp: nil, # Complex to calculate from just one period, leave nil or implement robust parsing later
       max_temp: nil,
       extended_forecast: periods.first(5).map { |p| { name: p["name"], temp: p["temperature"], text: p["shortForecast"] } },
+      location_name: location_name,
       cached: false
     )
   end

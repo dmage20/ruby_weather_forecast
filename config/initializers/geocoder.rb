@@ -2,10 +2,12 @@ Geocoder.configure(
   # Geocoding options
   timeout: 5,                 # geocoding service timeout (secs)
   lookup: :nominatim,         # name of geocoding service (symbol)
+  params: {
+    countrycodes: "us"        # Limit results to United States
+  },
   # ip_lookup: :ipinfo_io,      # name of IP address geocoding service (symbol)
   # language: :en,              # ISO-639 language code
-  use_https: true,           # use HTTPS for lookup requests? (if supported)
-  ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE, # Bypass SSL strictness for demo
+  # use_https: false,           # use HTTPS for lookup requests? (if supported)
   # http_proxy: nil,            # HTTP proxy server (user:pass@host:port)
   # https_proxy: nil,           # HTTPS proxy server (user:pass@host:port)
   # api_key: nil,               # API key for geocoding service
@@ -25,5 +27,9 @@ Geocoder.configure(
   #   expiration: 2.days,
   #   prefix: 'geocoder:'
   # }
-  http_headers: { "User-Agent" => "WeatherApp/1.0 (demo@example.com)" }
+  http_headers: {
+    "User-Agent" => "RubyWeatherForecast/1.0",
+    "Referer" => "http://localhost:3000"
+  },
+  use_https: true
 )

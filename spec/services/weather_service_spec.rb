@@ -10,13 +10,13 @@ RSpec.describe WeatherService do
 
     before do
       # Mock Geocoder
-      allow(Geocoder).to receive(:search).with(address).and_return(
-        [ double(latitude: lat, longitude: lon, postal_code: zip_code) ]
+      allow(Geocoder).to receive(:search).with(address, params: { countrycodes: "us" }).and_return(
+        [ double(latitude: lat, longitude: lon, postal_code: zip_code, city: "Test City", state_code: "PA", town: nil, village: nil, state: nil) ]
       )
     end
 
     context 'when forecast is cached' do
-      let(:cached_forecast) { WeatherForecast.new(current_temp: 72, min_temp: 60, max_temp: 80, extended_forecast: [], cached: true) }
+      let(:cached_forecast) { WeatherForecast.new(current_temp: 72, min_temp: 60, max_temp: 80, extended_forecast: [], location_name: "Test City, PA", cached: true) }
 
       before do
         allow(Rails.cache).to receive(:read).with(cache_key).and_return(cached_forecast)
@@ -41,7 +41,7 @@ RSpec.describe WeatherService do
 
         # Subbing any instance of WeatherService for the private method fetch_from_api
         allow_any_instance_of(described_class).to receive(:fetch_from_api).and_return(
-          WeatherForecast.new(current_temp: 65, min_temp: 50, max_temp: 70, extended_forecast: [], cached: false)
+          WeatherForecast.new(current_temp: 65, min_temp: 50, max_temp: 70, extended_forecast: [], location_name: "Test City, PA", cached: false)
         )
       end
 
@@ -59,7 +59,7 @@ RSpec.describe WeatherService do
 
     context 'when address is invalid' do
       before do
-        allow(Geocoder).to receive(:search).with('invalid').and_return([])
+        allow(Geocoder).to receive(:search).with('invalid', params: { countrycodes: "us" }).and_return([])
       end
 
       it 'returns nil or raises error' do
