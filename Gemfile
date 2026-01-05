@@ -66,7 +66,7 @@ end
 
 gem "rspec-rails", "~> 8.0"
 
-gem "dotenv-rails", "~> 3.1"
+gem "dotenv-rails", "~> 3.2"
 
 gem "geocoder"
 gem "faraday"
